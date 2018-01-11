@@ -1,0 +1,86 @@
+---
+layout: post
+title: 【漏洞分析】DedeCMS最新版(20180109)任意用户密码修改
+date: 2018-01-11
+categories: blog
+tags: [DedeCMS,密码重置]
+description: DedeCMS最新版(20180109)任意用户密码修改。
+---
+什么是DedeCMS？
+织梦内容管理系统(DeDeCMS) 以简单、实用、开源而闻名，是国内最知名的PHP开源网站管理系统，也是使用用户最多的PHP类CMS系统，在经历多年的发展，目前的版本无论在功能，还是在易用性方面，都有了长足的发展和进步。广泛应用于中小型企业门户网站，个人网站，企业和学习网站建设，在中国，DedeCMS应该属于最受人们喜爱的CMS系统。
+
+影响的版本
+2018年01月09日之前的所有版本。
+
+技术分析
+此漏洞点出现在忘记密码功能处.文件/member/resetpassword.php:
+<img class="aligncenter size-full wp-image-10659" src="http://blog.nsfocus.net/wp-content/uploads/2018/01/2-4.png" alt="" width="865" height="430" srcset="http://blog.nsfocus.net/wp-content/uploads/2018/01/2-4.png 865w, http://blog.nsfocus.net/wp-content/uploads/2018/01/2-4-300x149.png 300w, http://blog.nsfocus.net/wp-content/uploads/2018/01/2-4-768x382.png 768w, http://blog.nsfocus.net/wp-content/uploads/2018/01/2-4-600x298.png 600w" sizes="(max-width: 865px) 100vw, 865px" data-bd-imgshare-binded="1">
+
+
+在找回密码时，当$dopost = safequestion时，通过传入的member_id查询出对应id用户的安全问题和答案信息，当我们传入的问题和答案不为空，而且等于之前设置的问题和答案是就进入sn()函数。
+
+这里如果用户设置了问题和答案，我们并不知道问题和答案是什么，就无法进入sn()函数。但是如我此用户没有设置问题和答案呢？此时系统默认问题是”0”，答案是空。
+
+那么我们传入答案$safeanswer = “”时:
+
+$row[‘safeanswer’] == $safeanswer；成立。
+
+但是传入问题$safequestion = “0”时：
+
+if(empty($safequestion)) $safequestion = ”，而$row[safequestion] = “0”
+
+此时$row[safequestion] == $safequestion；不成立。
+
+所以要让$row[safequestion] == $safequestion；成立必须绕过if判断，此时如果属性PHP的话，会想到PHP的弱类型问题，所以在类型转换的时候往往会发生意料之外的情况。
+
+下面我们来看看如何绕过if empty的判断：
+
+
+
+可以看到使用”0.0”,”0.”,”0e1”都可以绕过前面的判断，最后进入sn()函数，继续跟进。
+
+sn()函数在文件/member/inc/inc_pwd_functions.php：
+
+
+
+这里当第一次进行忘记密码操作时，$row应该时空，所以进入第一个if条件发送邮件insert一条记录到dede_pwd_tmp表里；如果之前进行过忘记密码操作，但是时间已经超过10分钟，那么继续进行发送新验证码的操作update dede_pwd_tmp表里面的数据，跟进当前文件的newmail()函数。
+
+
+
+例如这里第一次进行insert操作（update操作是一样的）时，将8为的随机字符串$randval加密后下乳dede_pwd_tmp表中，然后当$send = N时（上面默认传入N），将随机字符串$randval拼接到url中返回，返回的url为：
+
+http://www.attack.com/member/resetpassword.php?dopost=getpasswd&id=$mid&key=$randval
+
+$mid就是可控的参数member_id，既然这列已经返回了重置密码的验证码key那么就可以直接重置对应id的用户密码了，跟进一下重置密码的过程。
+
+
+
+首先在重置密码时，判断输入的id对应用户是否进行过密码重置操作，如果没有就退出了。
+
+
+
+然后判断传入的key的md5是否等于数据库中的pwd内容，如果相等就直接修改了dede_member表中对应用户的密码了。
+
+漏洞验证
+直接发送如下请求即可获取重置密码的链接：
+
+http://localhost/DedeCMS-V5.7-UTF8-SP2/member/resetpassword.php?dopost=safequestion&safequestion=0e1&safeanwser=&id=1
+
+
+
+然后获取的重置面链接为：
+
+http://localhost/DedeCMS-V5.7-UTF8-SP2/member/resetpassword.php?dopost=getpasswd&id=1&key=D2kIQomh
+
+ 
+
+然后就可以直接重置密码了。
+
+这里修改id的值即可修改对应的用户的密码。
+
+但是这个漏洞存在一个缺陷，因为通过分析可以看出来只有没有设置安全问题的用户才会受此漏洞的影响；而且只能修改前台用户的密码。
+
+防护方案
+临时方案可以暂时关闭会员功能，等待官方发布升级补丁然后升级。
+
+
