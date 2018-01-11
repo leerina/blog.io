@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "Tags"
-description: "这里又文章种子，你可以点击然后快速查看" 
+description: "这里有文章种子，你可以点击快速查看" 
 header-img: "img/semantic.jpg"  
 ---
 
