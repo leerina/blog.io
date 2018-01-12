@@ -1,8 +1,8 @@
 ---
 layout: page
-title: "Tags"
-description: "哈哈，你找到了我的文章基因库"  
-header-img: "img/semantic.jpg"  
+title: "快速预览"
+description: "这里快速查看你的文章！"
+header-img: "img/semantic.jpg"  
 ---
 
 ##基因列表
