@@ -1,9 +1,11 @@
 ---
 layout: page
 title: "Tags"
-description: "这里有文章种子，你可以点击快速查看" 
-header-img: "img/semantic.jpg"  
+description: "哈哈，你找到了我的文章基因库"  
+header-img: "img/semantic.jpg"  
 ---
+
+##基因列表
 
 
 <div id='tag_cloud'>
