@@ -1,11 +1,11 @@
 ---
 layout: page
 title: "milestone"
-description: "代表作"
+description: "精华文章"
 header-img: "img/zhihu.jpg"
 ---
 
-这个页面放置你的代表作。
+这个页面显示您的精华文章。
 
 
 
