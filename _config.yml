@@ -1,8 +1,8 @@
 # Site settings
-title: 江山易改本性难移 #
+title: 风暴安全在线 #
 header-img: "img/green.jpg"
 tagline: "cn"  
-description: "江山易改本性难移"  # 一句话描述你的博客
+description: "风暴安全在线--专注于互联网安全建设"  # 一句话描述你的博客
 baseurl: ""
 url: "https://leerina.github.io"  # 此处填写你的博客地址 
 
@@ -10,7 +10,7 @@ url: "https://leerina.github.io"  # 此处填写你的博客地址
 owner: 
   name: "c0mpu7er" # 填写作者信息：名字
   email: leerina@hotmail.com # 填写作者信息：邮箱
-  bio: "梦安全时代" # 填写作者信息：博客描述
+  bio: "风暴安全在线" # 填写作者信息：博客描述
 
 # Data
 gavatar: img/favicon.png # 浏览器地址栏小图标，可自定义更改
